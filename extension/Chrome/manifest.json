@@ -1,0 +1,34 @@
+{
+  "manifest_version": 2,
+  "name": "AMSIext",
+  "version": "1.0",
+  "description": "Javascript AMSI checker",
+  "icons": {
+    "16": "icons/normal-16.png",
+    "32": "icons/normal-32.png",
+    "64": "icons/normal-64.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/normal-16.png",
+      "32": "icons/normal-32.png",
+      "64": "icons/normal-64.png"
+    },
+    "default_title": "AMSIext"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "nativeMessaging",
+    "http://*/*",
+    "https://*/*",
+    "activeTab",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "contextMenus",
+    "notifications"
+  ]
+}

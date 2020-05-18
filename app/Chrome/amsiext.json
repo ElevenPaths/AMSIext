@@ -1,0 +1,7 @@
+{
+  "name": "com.elevenpaths.amsiext",
+  "description": "Checking javascript code with AMSI",
+  "path": "amsiext.exe",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://mfemogppfiknihcakjojengjfpbanfei/"]
+}

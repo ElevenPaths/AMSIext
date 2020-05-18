@@ -1,0 +1,1 @@
+REG ADD "HKCU\Software\Google\Chrome\NativeMessagingHosts\com.elevenpaths.amsiext" /ve /t REG_SZ /d "%~dp0amsiext.json" /f

@@ -1,0 +1,7 @@
+{
+  "name": "amsiext",
+  "description": "Checking javascript code with AMSI",
+  "path": "amsiext.exe",
+  "type": "stdio",
+  "allowed_extensions": ["amsiext@11paths.com"]
+}
