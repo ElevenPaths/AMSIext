@@ -1,12 +1,12 @@
 {
   "manifest_version": 2,
   "name": "AMSIext",
-  "version": "1.0",
+  "version": "1.0.1",
   "description": "Javascript AMSI checker",
   "icons": {
     "16": "icons/normal-16.png",
-    "32": "icons/normal-32.png",
-    "64": "icons/normal-64.png"
+    "48": "icons/normal-48.png",
+    "128": "icons/normal-128.png"
   },
   "browser_action": {
     "default_icon": {
