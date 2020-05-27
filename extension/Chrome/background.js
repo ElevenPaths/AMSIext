@@ -1,4 +1,7 @@
 var port = chrome.runtime.connectNative("com.elevenpaths.amsiext");
+var version = null;
+sendMessage(null, null, null, "version");
+
 var extensions = [
   "js",
   "ps1",
@@ -19,15 +22,21 @@ var extensions = [
   "msh2xml",
 ];
 
+var whitelist = false;
+
+chrome.tabs.getCurrent(function (tab) {
+  chrome.browserAction.disable();
+  if (tab) {
+    if (validURL(tab.url)) {
+      chrome.browserAction.enable();
+    }
+  }
+});
+
 // -------------------- Our functions --------------------
 
-function updateWhitelist(whitelist) {
-  var map = {};
-  map["whitelist"] = whitelist;
-  chrome.storage.local.set(map);
-}
-
 function setButtonWhitelist() {
+  whitelist = true;
   chrome.browserAction.setIcon({
     path: {
       16: "icons/whitelist-16.png",
@@ -38,6 +47,7 @@ function setButtonWhitelist() {
 }
 
 function setButtonNormal() {
+  whitelist = false;
   chrome.browserAction.setIcon({
     path: {
       16: "icons/normal-16.png",
@@ -169,10 +179,13 @@ port.onMessage.addListener((response) => {
       title: "AMSI Extension",
       message: message,
     });
+  } else if (response.type == "version") {
+    version = response.result;
   }
 });
 
 port.onDisconnect.addListener(function () {
+  version = null;
   port = chrome.runtime.connectNative("com.elevenpaths.amsiext");
 });
 
@@ -223,6 +236,7 @@ function validURL(str) {
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status == "complete") {
     if (validURL(tab.url)) {
+      chrome.browserAction.enable();
       chrome.storage.local.get("whitelist", function (result) {
         var whitelist = [];
         if (result.whitelist) {
@@ -239,43 +253,29 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
       });
     } else {
-      setButtonNormal();
+      // setButtonNormal();
+      chrome.browserAction.disable();
     }
   }
 });
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   chrome.tabs.get(activeInfo.tabId, function (tab) {
-    chrome.storage.local.get("whitelist", function (result) {
-      var whitelist = [];
-      if (result.whitelist) {
-        whitelist = result.whitelist;
-      }
-      if (whitelist.includes(tab.url)) {
-        setButtonWhitelist();
-      } else {
-        setButtonNormal();
-      }
-    });
-  });
-});
-
-chrome.browserAction.onClicked.addListener(() => {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    chrome.storage.local.get("whitelist", function (result) {
-      var url = tabs[0].url;
-      var whitelist = [];
-      if (result.whitelist) {
-        whitelist = result.whitelist;
-      }
-      if (whitelist.includes(url)) {
-        whitelist.splice(whitelist.indexOf(url), 1);
-        setButtonNormal();
-      } else {
-        whitelist.push(url);
-        setButtonWhitelist();
-      }
-      updateWhitelist(whitelist);
-    });
+    if (validURL(tab.url)) {
+      chrome.browserAction.enable();
+      chrome.storage.local.get("whitelist", function (result) {
+        var whitelist = [];
+        if (result.whitelist) {
+          whitelist = result.whitelist;
+        }
+        if (whitelist.includes(tab.url)) {
+          setButtonWhitelist();
+        } else {
+          setButtonNormal();
+        }
+      });
+    } else {
+      chrome.browserAction.disable();
+    }
   });
 });

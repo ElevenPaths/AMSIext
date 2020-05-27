@@ -1,4 +1,7 @@
 var port = browser.runtime.connectNative("amsiext");
+var version = null;
+sendMessage(null, null, null, "version");
+
 var extensions = [
   "js",
   "ps1",
@@ -19,15 +22,21 @@ var extensions = [
   "msh2xml",
 ];
 
+var whitelist = false;
+
+browser.tabs.getCurrent(function (tab) {
+  browser.browserAction.disable();
+  if (tab) {
+    if (validURL(tab.url)) {
+      browser.browserAction.enable();
+    }
+  }
+});
+
 // -------------------- Our functions --------------------
 
-function updateWhitelist(whitelist) {
-  var map = {};
-  map["whitelist"] = whitelist;
-  browser.storage.local.set(map);
-}
-
 function setButtonWhitelist() {
+  whitelist = true;
   browser.browserAction.setIcon({
     path: {
       16: "icons/whitelist-16.png",
@@ -38,6 +47,7 @@ function setButtonWhitelist() {
 }
 
 function setButtonNormal() {
+  whitelist = false;
   browser.browserAction.setIcon({
     path: {
       16: "icons/normal-16.png",
@@ -169,10 +179,13 @@ port.onMessage.addListener((response) => {
       title: "AMSI Extension",
       message: message,
     });
+  } else if (response.type == "version") {
+    version = response.result;
   }
 });
 
 port.onDisconnect.addListener(function () {
+  version = null;
   port = browser.runtime.connectNative("amsiext");
 });
 
@@ -223,6 +236,7 @@ function validURL(str) {
 browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status == "complete") {
     if (validURL(tab.url)) {
+      browser.browserAction.enable();
       browser.storage.local.get("whitelist", function (result) {
         var whitelist = [];
         if (result.whitelist) {
@@ -239,43 +253,29 @@ browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
       });
     } else {
-      setButtonNormal();
+      // setButtonNormal();
+      browser.browserAction.disable();
     }
   }
 });
 
 browser.tabs.onActivated.addListener(function (activeInfo) {
   browser.tabs.get(activeInfo.tabId, function (tab) {
-    browser.storage.local.get("whitelist", function (result) {
-      var whitelist = [];
-      if (result.whitelist) {
-        whitelist = result.whitelist;
-      }
-      if (whitelist.includes(tab.url)) {
-        setButtonWhitelist();
-      } else {
-        setButtonNormal();
-      }
-    });
-  });
-});
-
-browser.browserAction.onClicked.addListener(() => {
-  browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    browser.storage.local.get("whitelist", function (result) {
-      var url = tabs[0].url;
-      var whitelist = [];
-      if (result.whitelist) {
-        whitelist = result.whitelist;
-      }
-      if (whitelist.includes(url)) {
-        whitelist.splice(whitelist.indexOf(url), 1);
-        setButtonNormal();
-      } else {
-        whitelist.push(url);
-        setButtonWhitelist();
-      }
-      updateWhitelist(whitelist);
-    });
+    if (validURL(tab.url)) {
+      browser.browserAction.enable();
+      browser.storage.local.get("whitelist", function (result) {
+        var whitelist = [];
+        if (result.whitelist) {
+          whitelist = result.whitelist;
+        }
+        if (whitelist.includes(tab.url)) {
+          setButtonWhitelist();
+        } else {
+          setButtonNormal();
+        }
+      });
+    } else {
+      browser.browserAction.disable();
+    }
   });
 });

@@ -1,5 +1,8 @@
 #!/usr/bin/python -u
 
+# Code adapted from AMSI Interface in Python by masthoon
+# https://gist.github.com/masthoon/8ada1d19e6e217481aa881fab16b5970
+
 import json
 import sys
 import struct
@@ -8,6 +11,8 @@ import urllib
 import windows
 import windows.winproxy
 import windows.generated_def as gdef
+
+VERSION = "1.0.2"
 
 class AMSIProxy(windows.winproxy.ApiProxy):
     APIDLL = "Amsi"
@@ -130,15 +135,19 @@ with AMSIScanner() as scanner:
         try:
             message = get_message()
             result = {
-                "tabId": message["tabId"],
-                "origin": message["origin"],
-                "type": message["type"],
-                "result": True
-            }
-            res = scanner.scan(urllib.unquote(message["message"]).encode('utf-8'))
-            if (res.value.numerator == 0) or (res.value.numerator == 1):
-                result["result"] = False
+                    "tabId": message["tabId"],
+                    "origin": message["origin"],
+                    "type": message["type"],
+                    "result": True
+                }
+            if message["type"] == "version":
+                result["result"] = VERSION
+            else:
+                res = scanner.scan(urllib.unquote(message["message"]).encode('utf-8'))
+                if (res.value.numerator == 0) or (res.value.numerator == 1):
+                    result["result"] = False
             send_message(encode_message(result))
         except Exception as e:
             send_message(encode_message("Exception: {}".format(e)))
             pass
+        
