@@ -7,11 +7,11 @@ var whitelistButton = document.getElementById("add-to-whitelist");
 // Detect version
 if (appVersion == null) {
   message =
-    '<p>Addon not detected.</br>Check if it is in the right path or download and install it from <a href="https://amsiext.e-paths.com/download-chrome.html">here</a>.</p>';
+    '<p>Addon not detected.</br>Check if it is in the right path or download and install it from <a href="https://amsiext.e-paths.com/download-chrome.html" target="_blank">here</a>.</p>';
   setMessage(message);
 } else if (extVersion != appVersion) {
   message =
-    '<p>Addon version incorrect.</br>Please, download and install new version from <a href="https://amsiext.e-paths.com/download-chrome.html">here</a>.</p>';
+    '<p>Addon version incorrect.</br>Please, download and install new version from <a href="https://amsiext.e-paths.com/download-chrome.html" target="_blank">here</a>.</p>';
   setMessage(message);
 } else {
   updateButtonWhitelistStatus();
